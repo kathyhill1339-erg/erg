@@ -24,12 +24,13 @@ lessons/what-is-money.html     Module 1, barter and money simulation with proper
 lessons/purchasing-power.html  Module 2, inflation model and the simplest template for new modules
 lessons/central-banks.html     Module 3, entry channels for new money and a Cantillon effect model
 lessons/reserve-currencies.html  Module 4, network-effect model of currency dominance with IMF and BIS data
+lessons/energy-and-value.html  Module 5, supply growth and stock-to-flow projections and a mining energy model
 .nojekyll                      Tells GitHub Pages to serve files as they are
 ```
 
 ## Adding a new module
 
-1. Copy `lessons/purchasing-power.html` to a new file in `lessons/`, such as `lessons/energy-and-value.html`.
+1. Copy `lessons/purchasing-power.html` to a new file in `lessons/`, such as `lessons/new-module.html`.
 2. Replace the lesson text in each step. Every module follows the sequence predict, model, reconcile, and inspect, and a module may add further steps as Module 1 does.
 3. Replace the Python in the `PY_MODEL` string with the new model. The model receives its inputs as Python globals and returns a dictionary to JavaScript.
 4. Update the chart and results panels to display the new outputs.

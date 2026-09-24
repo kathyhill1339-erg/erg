@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy, scarcity, and value | erg</title>
+<link rel="icon" href="../assets/bee.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/erg.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img src="../assets/bee.svg" alt="">
+      <span class="wordmark">erg</span>
+    </a>
+    <nav class="site-nav">
+      <a href="../index.html#modules">All modules</a>
+    </nav>
+  </div>
+</header>
+
+<section class="lesson-head">
+  <div class="wrap">
+    <span class="module-num">Module 5</span>
+    <h1>Energy, scarcity, and value</h1>
+    <p>An erg is a unit of energy, and this site takes its name from a question that has divided economists for centuries. Does the effort required to produce money give it value, or does value simply attract effort? In this investigation you will measure how quickly different forms of money can be produced, then model how energy use responds to price.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <!-- STEP 1. Predict -->
+    <section class="step">
+      <h2><span class="n">1</span>Commit to a prediction</h2>
+      <p>Module 2 showed that money loses purchasing power when its supply grows faster than the goods it buys. Consider three forms of money today, gold, Bitcoin, and U.S. dollars. Over the coming year, which one do you expect to have the slowest growth in total supply, as a percentage of the amount that already exists?</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="pred" value="gold"><span>Gold, because it has been mined for thousands of years and new deposits are hard to find.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="btc"><span>Bitcoin, because its issuance follows a fixed schedule written into its software.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="usd"><span>U.S. dollars, because the Federal Reserve manages the money supply to keep it stable.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="same"><span>All three grow at roughly the same rate.</span></label>
+      </div>
+      <button class="btn secondary" id="lockPrediction">Lock in my prediction</button>
+      <p class="status" id="predictionStatus"></p>
+    </section>
+
+    <!-- STEP 2. Measure -->
+    <section class="step">
+      <h2><span class="n">2</span>Measure scarcity with stock and flow</h2>
+      <p>Scarcity can be measured by comparing the <strong>stock</strong> of an asset, meaning the total amount that already exists, with its <strong>flow</strong>, meaning the amount newly produced each year. Dividing the flow by the stock gives the annual growth rate of supply. Dividing the stock by the flow gives the <strong>stock-to-flow ratio</strong>, the number of years of current production needed to double the existing supply. A high ratio means new production can do little to dilute existing holdings.</p>
+      <div class="channels">
+        <div class="channel">
+          <h3>Gold</h3>
+          <p>About 222,600 tonnes have been mined in all of history, and nearly all of it still exists. Mines produced a record 3,672 tonnes in 2025.</p>
+          <p class="first">Sources. <a href="https://www.gold.org/goldhub/data/how-much-gold" target="_blank" rel="noopener">World Gold Council, above-ground stocks</a> and <a href="https://www.gold.org/goldhub/research/gold-demand-trends/gold-demand-trends-full-year-2025/supply" target="_blank" rel="noopener">Gold Demand Trends, full year 2025</a>.</p>
+        </div>
+        <div class="channel">
+          <h3>Bitcoin</h3>
+          <p>New bitcoins are created at a fixed rate that halves about every four years. Since the April 2024 halving, about 164,000 new coins enter a supply of roughly 20 million each year, and total supply can never exceed 21 million.</p>
+          <p class="first">Source. Issuance rules in the Bitcoin protocol, computed in the model below.</p>
+        </div>
+        <div class="channel">
+          <h3>U.S. dollars</h3>
+          <p>The broad money supply, called M2, includes cash, checking and savings deposits, and money market funds. It stood at about $23.3 trillion in August 2026 and has grown by roughly 6 to 7 percent per year on average since 1960, with wide swings from year to year.</p>
+          <p class="first">Source. <a href="https://fred.stlouisfed.org/series/M2SL" target="_blank" rel="noopener">Federal Reserve Bank of St. Louis, FRED series M2SL</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3. Supply model -->
+    <section class="step">
+      <h2><span class="n">3</span>Model future supply growth</h2>
+      <p>The model projects the annual supply growth of each asset from 2016 to 2060. Bitcoin follows its programmed schedule. Gold assumes that mines keep producing at the 2025 rate. Dollar growth has no fixed rule, so you choose the rate. Try the long-run average of about 6.5 percent, then try lower and higher values.</p>
+
+      <div class="controls">
+        <div>
+          <label for="usdGrowth">Annual growth of the dollar money supply <output id="usdGrowthOut">6.5%</output></label>
+          <input type="range" id="usdGrowth" min="0" max="15" step="0.5" value="6.5">
+        </div>
+        <div>
+          <label for="goldOutput">Gold mine output, as a share of 2025 output <output id="goldOutputOut">100%</output></label>
+          <input type="range" id="goldOutput" min="50" max="200" step="10" value="100">
+        </div>
+      </div>
+
+      <button class="btn" id="runSupply" disabled>Run the supply model</button>
+      <p class="status" id="engineStatus">Loading the Python engine. This takes several seconds on the first visit.</p>
+
+      <div class="results">
+        <div class="stat"><div class="label">Bitcoin supply growth, next 12 months</div><div class="value" id="statBtc">...</div></div>
+        <div class="stat"><div class="label">Gold supply growth, next 12 months</div><div class="value" id="statGold">...</div></div>
+        <div class="stat"><div class="label">Dollar supply growth, next 12 months</div><div class="value" id="statUsd">...</div></div>
+        <div class="stat"><div class="label">Stock-to-flow ratios, Bitcoin, gold, dollar</div><div class="value" id="statS2F" style="font-size:20px;">...</div></div>
+      </div>
+
+      <div id="supplyChart" class="chart"></div>
+      <p class="status">Annual growth in the total supply of each asset. Bitcoin's steps mark its halvings, which the model places about every four years after 2024. Years before 2026 use the same simplified assumptions, so the gold and dollar lines are not historical data.</p>
+    </section>
+
+    <!-- STEP 4. Energy model -->
+    <section class="step">
+      <h2><span class="n">4</span>Model energy and price</h2>
+      <p>Bitcoin miners spend electricity to compete for newly issued coins. When the price rises, mining becomes more profitable, and miners add machines until their costs approach their revenue. The Bitcoin software then raises the difficulty of mining so that coins are still issued at the scheduled rate, no matter how much energy is spent.</p>
+      <p>The model starts with miners in balance. In month 24 the price changes by the amount you choose, and in month 60 a halving cuts new issuance in half. Miners close the gap between their spending and their revenue gradually, at the speed you choose.</p>
+
+      <div class="controls">
+        <div>
+          <label for="shock">Price change in month 24 <output id="shockOut">+100%</output></label>
+          <input type="range" id="shock" min="-50" max="200" step="10" value="100">
+        </div>
+        <div>
+          <label for="speed">Months for miners to close half the gap <output id="speedOut">6</output></label>
+          <input type="range" id="speed" min="1" max="24" step="1" value="6">
+        </div>
+      </div>
+
+      <button class="btn" id="runEnergy" disabled>Run the energy model</button>
+
+      <div id="energyChart" class="chart" style="margin-top:18px;"></div>
+      <p class="status">All three lines are indexed to 100 in month 0. Mining revenue equals price multiplied by new coins issued.</p>
+
+      <p>According to the <a href="https://ccaf.io/cbnsi/cbeci" target="_blank" rel="noopener">Cambridge Centre for Alternative Finance</a>, recent estimates place Bitcoin mining's electricity use at roughly 140 to 190 terawatt-hours per year, on the order of half of one percent of world electricity consumption.</p>
+    </section>
+
+    <!-- STEP 5. Reconcile -->
+    <section class="step">
+      <h2><span class="n">5</span>Reconcile and weigh the arguments</h2>
+      <p id="reconcileText">Lock in a prediction in Step 1, then run the supply model to compare.</p>
+
+      <details>
+        <summary>What did the energy model show?</summary>
+        <p>Energy spending followed the price, rising after the price increased and falling after the halving cut revenue. The number of new coins did not respond to energy at all. In this model, price determines how much energy is spent, and energy does not determine price. This matches the view of the economists of the 1870s marginal revolution, such as Carl Menger, who argued that value arises from what people are willing to give up for a good, and that production costs adjust to value rather than the reverse.</p>
+      </details>
+
+      <details>
+        <summary>Why might the cost of production still matter?</summary>
+        <p>The computer scientist Nick Szabo used the phrase "unforgeable costliness" to describe money whose supply cannot be expanded cheaply. On this view, energy does not create value directly. Instead, the high cost of producing new units is what keeps supply from rising when demand rises, which protects existing holders from the dilution you modeled in Modules 2 and 3. Gold miners can respond to higher prices only slowly, and Bitcoin issuance cannot respond at all. Dollars, by contrast, cost almost nothing to create.</p>
+      </details>
+
+      <details>
+        <summary>Does scarcity alone create value?</summary>
+        <p>No. Many things are scarce and nearly worthless, and scarcity measures only how difficult it is to increase supply. It says nothing about demand. Price forecasts built on stock-to-flow ratios alone have performed poorly, and a low supply growth rate is compatible with very large swings in price, as Bitcoin's history shows. Money also needs the other properties from Module 1, including wide acceptance, which Module 4 showed can depend heavily on network effects.</p>
+      </details>
+
+      <details>
+        <summary>Is the energy well spent?</summary>
+        <p>Critics argue that the electricity consumed by Bitcoin mining produces greenhouse gas emissions and serves no purpose beyond securing a single payment network. Supporters argue that the energy secures a monetary system without a central issuer, and that miners often use electricity that would otherwise be wasted, such as surplus hydroelectric power or gas flared at oil wells. A 2025 industry survey by Cambridge researchers reported that more than half of the electricity used by surveyed miners came from low-carbon sources. Gold mining also consumes large amounts of energy and alters landscapes, which makes the comparison between the two more complex than either side often admits.</p>
+      </details>
+
+      <div class="callout">
+        <strong>Final reflection.</strong> Across five modules you have modeled what money solves, how inflation erodes it, who gains when new money is created, why one currency can dominate the world, and what makes supply hard or easy to expand. Write a short answer to the question that runs through all of them. What should a society want from its money, and which of the forms you studied comes closest to providing it?
+        <textarea id="finalReflection" style="margin-top:12px;background:#fff;" placeholder="Your answer stays on this page and is not saved or sent anywhere."></textarea>
+      </div>
+    </section>
+
+    <!-- STEP 6. Inspect -->
+    <section class="step">
+      <h2><span class="n">6</span>Inspect the code</h2>
+      <p>Nothing on this page is hidden. The Python below is the exact code that produced both models, running in your browser through Pyodide.</p>
+      <details>
+        <summary>Show the supply model</summary>
+        <pre id="codeSupply" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+      <details>
+        <summary>Show the energy model</summary>
+        <pre id="codeEnergy" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+    </section>
+
+    <p style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <a class="btn secondary" href="reserve-currencies.html" style="text-decoration:none;display:inline-block;">Previous module, Reserve currencies and global trade</a>
+      <a class="btn secondary" href="../index.html#modules" style="text-decoration:none;display:inline-block;">All modules</a>
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">erg is an educational project. Nothing on this site constitutes financial advice.</div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// Supply model. Inputs arrive as globals m (dollar growth) and q (gold output
+// as a multiple of 2025 output).
+// ---------------------------------------------------------------------------
+const PY_SUPPLY = `import numpy as np
+
+NOW = 2026.7                  # September 2026
+
+# Bitcoin: 210,000 blocks per halving period, starting at 50 coins per block.
+# Actual halving dates through 2024, then about every four years.
+HALVINGS = [2009.0, 2012.91, 2016.52, 2020.36, 2024.30] + [2028.30 + 4 * k for k in range(40)]
+
+def bitcoin_supply(t):
+    total = 0.0
+    for k in range(len(HALVINGS) - 1):
+        start, end = HALVINGS[k], HALVINGS[k + 1]
+        coins = 210_000 * 50 / 2 ** k
+        if t >= end:
+            total += coins
+        elif t > start:
+            total += coins * (t - start) / (end - start)
+    return total
+
+# Gold: 222,600 tonnes above ground (mid-2026), 3,671.6 tonnes mined in 2025.
+# The output multiplier q applies only to future years.
+def gold_supply(t, q):
+    rate = 3_671.6 * (q if t >= 2026.5 else 1)
+    return 222_600 + rate * (t - 2026.5)
+
+# Dollars: M2 of $23,342.8 billion in August 2026, growing at rate m.
+def dollar_supply(t, m):
+    return 23_342.8 * (1 + m) ** (t - 2026.6)
+
+def growth(f, t):
+    return (f(t + 1) - f(t)) / f(t)
+
+def project(m, q):
+    years = np.arange(2016, 2061)
+    btc = [growth(bitcoin_supply, y) for y in years]
+    gold = [growth(lambda t: gold_supply(t, q), y) for y in years]
+    usd = [growth(lambda t: dollar_supply(t, m), y) for y in years]
+    now = {
+        "btc": growth(bitcoin_supply, NOW),
+        "gold": growth(lambda t: gold_supply(t, q), NOW),
+        "usd": growth(lambda t: dollar_supply(t, m), NOW),
+    }
+    return {
+        "years": years.tolist(),
+        "btc": btc, "gold": gold, "usd": usd,
+        "now": now,
+        "s2f": {k: (1 / v if v > 0 else None) for k, v in now.items()},
+    }
+
+result = project(m, q)
+result`;
+
+// ---------------------------------------------------------------------------
+// Energy model. Inputs arrive as globals shock (price change in month 24)
+// and h (months for miners to close half the gap).
+// ---------------------------------------------------------------------------
+const PY_ENERGY = `import numpy as np
+
+def mining(shock, h, months=96):
+    t = np.arange(months)
+    price = np.where(t < 24, 1.0, 1.0 + shock)       # price steps in month 24
+    issuance = np.where(t < 60, 1.0, 0.5)            # halving in month 60
+    revenue = price * issuance                       # what miners can earn
+
+    rate = 1 - 0.5 ** (1 / h)                        # share of gap closed each month
+    energy = np.empty(months)
+    energy[0] = revenue[0]                           # start in balance
+    for i in range(1, months):
+        energy[i] = energy[i - 1] + rate * (revenue[i - 1] - energy[i - 1])
+
+    return {
+        "t": t.tolist(),
+        "revenue": (100 * revenue).tolist(),
+        "energy": (100 * energy).tolist(),
+        "coins": (100 * issuance).tolist(),          # unaffected by energy
+    }
+
+result = mining(shock, h)
+result`;
+
+const $ = (id) => document.getElementById(id);
+let pyodide = null;
+let lockedPrediction = null;
+let supplyRun = null;
+const BASE_LAYOUT = {
+  margin: { l: 70, r: 20, t: 20, b: 60 },
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor: "#f8f5fd",
+  font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+};
+const pct = (x, d = 2) => (x * 100).toFixed(d) + "%";
+
+function syncLabels() {
+  $("usdGrowthOut").textContent = Number($("usdGrowth").value).toFixed(1) + "%";
+  $("goldOutputOut").textContent = $("goldOutput").value + "%";
+  const s = Number($("shock").value);
+  $("shockOut").textContent = (s >= 0 ? "+" : "−") + Math.abs(s) + "%";
+  $("speedOut").textContent = $("speed").value;
+}
+["usdGrowth", "goldOutput", "shock", "speed"].forEach((id) => $(id).addEventListener("input", syncLabels));
+syncLabels();
+$("codeSupply").textContent = PY_SUPPLY;
+$("codeEnergy").textContent = PY_ENERGY;
+
+// Step 1
+$("lockPrediction").addEventListener("click", () => {
+  const picked = document.querySelector('input[name="pred"]:checked');
+  if (!picked) {
+    $("predictionStatus").textContent = "Select one answer before locking in.";
+    $("predictionStatus").className = "status error";
+    return;
+  }
+  lockedPrediction = picked.value;
+  document.querySelectorAll('input[name="pred"]').forEach((el) => {
+    el.disabled = true;
+    el.closest(".choice").classList.add("locked");
+  });
+  picked.closest(".choice").classList.add("picked");
+  $("lockPrediction").disabled = true;
+  $("predictionStatus").textContent = "Prediction recorded.";
+  $("predictionStatus").className = "status ready";
+  if (supplyRun) reconcile(supplyRun);
+});
+
+async function startEngine() {
+  try {
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/" });
+    await pyodide.loadPackage("numpy");
+    $("engineStatus").textContent = "Python engine ready.";
+    $("engineStatus").className = "status ready";
+    $("runSupply").disabled = false;
+    $("runEnergy").disabled = false;
+  } catch (err) {
+    $("engineStatus").textContent = "The Python engine could not load. Check the internet connection and reload the page.";
+    $("engineStatus").className = "status error";
+    console.error(err);
+  }
+}
+
+function runPy(code, inputs) {
+  Object.entries(inputs).forEach(([k, v]) => pyodide.globals.set(k, v));
+  const proxy = pyodide.runPython(code);
+  const r = proxy.toJs({ dict_converter: Object.fromEntries });
+  proxy.destroy();
+  return r;
+}
+
+// Step 3
+function runSupply() {
+  const r = runPy(PY_SUPPLY, {
+    m: Number($("usdGrowth").value) / 100,
+    q: Number($("goldOutput").value) / 100,
+  });
+  supplyRun = r;
+  $("statBtc").textContent = pct(r.now.btc);
+  $("statGold").textContent = pct(r.now.gold);
+  $("statUsd").textContent = pct(r.now.usd);
+  const s2f = (v) => (v == null ? "\u221e" : Math.round(v));
+  $("statS2F").textContent = s2f(r.s2f.btc) + ", " + s2f(r.s2f.gold) + ", " + s2f(r.s2f.usd);
+
+  const series = [
+    ["Bitcoin", r.btc, "#2f7a4d"],
+    ["Gold", r.gold, "#e0a526"],
+    ["U.S. dollars (M2)", r.usd, "#4b2f82"],
+  ];
+  Plotly.react("supplyChart", series.map(([name, y, color]) => ({
+    x: r.years, y: y.map((v) => v * 100), name, mode: "lines",
+    line: { color, width: 3 },
+    hovertemplate: name + "<br>%{x}<br>%{y:.2f}% per year<extra></extra>",
+  })), {
+    ...BASE_LAYOUT,
+    xaxis: { title: "Year", gridcolor: "#e6def5" },
+    yaxis: { title: "Annual growth in total supply", gridcolor: "#e6def5", ticksuffix: "%", rangemode: "tozero" },
+    legend: { orientation: "h", y: -0.22 },
+    shapes: [{ type: "line", x0: 2026.7, x1: 2026.7, yref: "paper", y0: 0, y1: 1, line: { color: "#736b88", dash: "dot", width: 1 } }],
+    annotations: [{ x: 2026.7, yref: "paper", y: 1, text: "Today", showarrow: false, xanchor: "left", font: { size: 12, color: "#736b88" } }],
+  }, { responsive: true, displayModeBar: false });
+
+  reconcile(r);
+}
+
+// Step 4
+function runEnergy() {
+  const r = runPy(PY_ENERGY, {
+    shock: Number($("shock").value) / 100,
+    h: Number($("speed").value),
+  });
+  const lines = [
+    ["Mining revenue", r.revenue, "#e0a526", "solid", 3],
+    ["Energy spending", r.energy, "#4b2f82", "solid", 3],
+    ["New coins issued", r.coins, "#736b88", "dash", 2],
+  ];
+  Plotly.react("energyChart", lines.map(([name, y, color, dash, width]) => ({
+    x: r.t, y, name, mode: "lines", line: { color, dash, width },
+    hovertemplate: name + "<br>Month %{x}<br>%{y:.0f}<extra></extra>",
+  })), {
+    ...BASE_LAYOUT,
+    xaxis: { title: "Month", gridcolor: "#e6def5" },
+    yaxis: { title: "Index, month 0 = 100", gridcolor: "#e6def5", rangemode: "tozero" },
+    legend: { orientation: "h", y: -0.22 },
+  }, { responsive: true, displayModeBar: false });
+}
+
+// Step 5
+function reconcile(r) {
+  if (lockedPrediction === null) {
+    $("reconcileText").textContent = "Lock in a prediction in Step 1 to compare it with the model.";
+    return;
+  }
+  const rates = { btc: r.now.btc, gold: r.now.gold, usd: r.now.usd };
+  const names = { btc: "Bitcoin", gold: "gold", usd: "U.S. dollars" };
+  const slowest = Object.keys(rates).reduce((a, b) => (rates[a] <= rates[b] ? a : b));
+  let text = "With your current settings, supply grows by " + pct(rates.btc) + " for Bitcoin, " +
+    pct(rates.gold) + " for gold, and " + pct(rates.usd) + " for U.S. dollars over the next year, so the slowest growth belongs to " +
+    names[slowest] + ". ";
+  if (lockedPrediction === slowest) {
+    text += "This matches your prediction.";
+  } else if (lockedPrediction === "same") {
+    text += "You predicted that all three would grow at about the same rate, but the rates differ severalfold.";
+  } else {
+    text += "You predicted " + names[lockedPrediction] + ". Consider which feature of each asset's production your reasoning emphasized.";
+  }
+  text += " Notice also that Bitcoin's growth rate keeps falling by half every four years, while gold's falls only slowly as the stock grows.";
+  $("reconcileText").textContent = text;
+}
+
+$("runSupply").addEventListener("click", runSupply);
+$("runEnergy").addEventListener("click", runEnergy);
+startEngine();
+</script>
+</body>
+</html>
