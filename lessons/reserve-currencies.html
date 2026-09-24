@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserve currencies and global trade | erg</title>
+<link rel="icon" href="../assets/bee.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/erg.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img src="../assets/bee.svg" alt="">
+      <span class="wordmark">erg</span>
+    </a>
+    <nav class="site-nav">
+      <a href="../index.html#modules">All modules</a>
+    </nav>
+  </div>
+</header>
+
+<section class="lesson-head">
+  <div class="wrap">
+    <span class="module-num">Module 4</span>
+    <h1>Reserve currencies and global trade</h1>
+    <p>There are more than 150 national currencies, yet a single one takes part in nearly nine of every ten currency trades worldwide. In this investigation you will model how such dominance can arise, compare the model with real data, and weigh what the arrangement provides and what it costs.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <!-- STEP 1. Predict -->
+    <section class="step">
+      <h2><span class="n">1</span>Commit to a prediction</h2>
+      <p>Fifty countries trade with one another. Five currencies begin in equal use, with ten countries using each. Every country has its own preferences among the five, based on factors such as geography and politics. From time to time, each country reconsiders which currency to use for trade, and it gives some weight to its own preferences and some weight to how many other countries already use each currency.</p>
+      <p>When other countries' choices carry a little more weight than a country's own preferences, how many of the five currencies do you expect to remain in wide use, meaning used by at least one country in ten?</p>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="pred" value="5"><span>All five, because each country keeps its own preferences.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="3"><span>Three or four, because a few weak currencies drop out.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="2"><span>Two, because two leading currencies divide the world between them.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="1"><span>One, because every country eventually adopts the same currency.</span></label>
+      </div>
+      <button class="btn secondary" id="lockPrediction">Lock in my prediction</button>
+      <p class="status" id="predictionStatus"></p>
+    </section>
+
+    <!-- STEP 2. Arithmetic -->
+    <section class="step">
+      <h2><span class="n">2</span>Recognize a familiar problem</h2>
+      <p>Module 1 showed that a village with 20 goods needs 190 exchange rates under barter but only 19 prices once one good serves as money. Countries face the same arithmetic. If every pair of currencies traded directly, 150 currencies would require 11,175 separate currency markets. If every currency trades only against one common currency, 149 markets are enough.</p>
+      <p>A currency that plays this role is called a <strong>vehicle currency</strong>. A business in Brazil paying a supplier in Korea can convert reais to the vehicle currency and the vehicle currency to won, using two deep, inexpensive markets instead of one thin, costly one. The more countries use the vehicle currency, the deeper and cheaper those markets become, which draws in still more users. Economists call this self-reinforcing pattern a <strong>network effect</strong>.</p>
+    </section>
+
+    <!-- STEP 3. Model -->
+    <section class="step">
+      <h2><span class="n">3</span>Model network effects</h2>
+      <p>The model assigns each of 50 countries a random set of preferences among five currencies, labeled A through E. In each round, every country on average reconsiders its choice once and selects the currency with the highest score. A currency's score blends the country's own preference with the share of all countries already using that currency. The slider sets how much weight goes to other countries' choices.</p>
+      <p>Run the model several times at the same setting. Because preferences and timing are random, the winning currency can differ from run to run.</p>
+
+      <div class="controls">
+        <div>
+          <label for="network">Weight on other countries' choices <output id="networkOut">60%</output></label>
+          <input type="range" id="network" min="0" max="100" step="5" value="60">
+        </div>
+        <div>
+          <label for="rounds">Rounds of reconsideration <output id="roundsOut">20</output></label>
+          <input type="range" id="rounds" min="5" max="60" step="5" value="20">
+        </div>
+      </div>
+
+      <button class="btn" id="runBtn" disabled>Run the model</button>
+      <p class="status" id="engineStatus">Loading the Python engine. This takes several seconds on the first visit.</p>
+
+      <div class="results">
+        <div class="stat"><div class="label">Currencies in wide use at the end</div><div class="value" id="statWide">...</div></div>
+        <div class="stat"><div class="label">Share held by the leading currency</div><div class="value" id="statLead">...</div></div>
+        <div class="stat"><div class="label">Leading currency this run</div><div class="value" id="statWinner">...</div></div>
+        <div class="stat"><div class="label">Runs so far that ended with one currency</div><div class="value" id="statRuns">...</div></div>
+      </div>
+
+      <div id="pathChart" class="chart"></div>
+      <p class="status">Share of the 50 countries using each currency, round by round.</p>
+    </section>
+
+    <!-- STEP 4. Evidence -->
+    <section class="step">
+      <h2><span class="n">4</span>Compare the model with the world</h2>
+      <p>Real currency use can be measured in several ways. The chart compares the three most widely used currencies on two of them. The first is the share of official foreign exchange reserves, the savings that central banks hold in other countries' currencies. The second is the share of foreign exchange trades in which each currency is bought or sold. Because every trade involves two currencies, the second set of shares adds up to 200 percent.</p>
+      <div id="dataChart" class="chart"></div>
+      <p class="status">Sources. Reserves from the <a href="https://data.imf.org/en/news/imf%20data%20brief%20july%201" target="_blank" rel="noopener">IMF Currency Composition of Official Foreign Exchange Reserves, first quarter of 2026</a>. Trades from the <a href="https://www.bis.org/statistics/rpfx25_fx.htm" target="_blank" rel="noopener">BIS Triennial Central Bank Survey, April 2025</a>, which reports average turnover of $9.6 trillion per day.</p>
+      <p>The dominance is not uniform. According to the <a href="https://www.federalreserve.gov/econres/notes/feds-notes/the-international-role-of-the-u-s-dollar-2025-edition-20250718.html" target="_blank" rel="noopener">Federal Reserve's 2025 review of the dollar's international role</a>, the dollar is used to invoice about 96 percent of trade in the Americas and 74 percent in the Asia-Pacific region, while the euro leads in Europe at 66 percent. Consider which feature of the model could produce a regional pattern of this kind.</p>
+    </section>
+
+    <!-- STEP 5. Reconcile -->
+    <section class="step">
+      <h2><span class="n">5</span>Reconcile and weigh the arrangement</h2>
+      <p id="reconcileText">Lock in a prediction in Step 1, then run the model at the default setting to compare.</p>
+
+      <details>
+        <summary>Why does the model tip so sharply?</summary>
+        <p>When other countries' choices carry little weight, each country follows its own preferences and all five currencies survive. Above a threshold, a currency that gains a small lead by chance becomes more attractive to every country, which widens its lead further. Small early advantages grow into total dominance. Try weights between 30 and 55 percent to locate the threshold, and notice that the outcome near it becomes unpredictable.</p>
+      </details>
+
+      <details>
+        <summary>What does the issuing country gain?</summary>
+        <p>In the 1960s the French finance minister Valéry Giscard d'Estaing described the dollar's position as an "exorbitant privilege." Because the world needs dollars for trade and reserves, foreign governments and investors hold large amounts of U.S. government debt. That steady demand can lower U.S. borrowing costs. A dominant currency also gives its issuer influence, because access to the currency's payment system can be restricted. In 2022, for example, the United States and its allies immobilized the foreign reserves of Russia's central bank.</p>
+      </details>
+
+      <details>
+        <summary>What does the arrangement cost, and whom?</summary>
+        <p>In 1960 the economist Robert Triffin identified a tension that now bears his name. To supply the world with enough of its currency, the issuing country must run persistent deficits with the rest of the world, which over time can undermine confidence in the currency itself. Costs also fall on other countries. When the Federal Reserve raises interest rates to address conditions in the United States, countries and companies that borrowed in dollars face higher payments, whether or not their own economies need tighter conditions.</p>
+      </details>
+
+      <details>
+        <summary>Is the arrangement permanent?</summary>
+        <p>The model shows that a dominant currency can be very stable, because every user benefits from staying with the others. History shows that dominance can still shift. The British pound held the leading role before the dollar replaced it during the twentieth century. Today some central banks are adding other currencies and gold to their reserves, and the renminbi's share of foreign exchange trading has risen in every BIS survey since 2013. Whether these changes mark the beginning of a transition or remain marginal is a matter of active debate.</p>
+      </details>
+
+      <div class="callout">
+        <strong>Question to carry forward.</strong> A reserve currency is trusted largely because others already use it. Some people argue that money should instead rest on something that is costly to produce, such as gold or the energy spent to create Bitcoin. Module 5 compares assets by the energy and effort required to produce them.
+      </div>
+    </section>
+
+    <!-- STEP 6. Inspect -->
+    <section class="step">
+      <h2><span class="n">6</span>Inspect the code</h2>
+      <p>Nothing on this page is hidden. The Python below is the exact code that produced your model results, running in your browser through Pyodide.</p>
+      <details>
+        <summary>Show the Python model</summary>
+        <pre id="codeView" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+    </section>
+
+    <p style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <a class="btn secondary" href="central-banks.html" style="text-decoration:none;display:inline-block;">Previous module, Central banks and the money supply</a>
+      <a class="btn secondary" href="../index.html#modules" style="text-decoration:none;display:inline-block;">All modules</a>
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">erg is an educational project. Nothing on this site constitutes financial advice.</div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// The Python model. Kept as a plain string so learners can read it in Step 6.
+// Inputs arrive as globals s (weight on others' choices) and R (rounds).
+// ---------------------------------------------------------------------------
+const PY_MODEL = `import numpy as np
+
+def currency_competition(s, R, N=50, K=5):
+    rng = np.random.default_rng()
+
+    # Each country's own preference for each of the K currencies.
+    preference = rng.random((N, K))
+
+    # Start with an equal split: N / K countries on each currency.
+    choice = np.arange(N) % K
+    rng.shuffle(choice)
+
+    history = [np.bincount(choice, minlength=K) / N]
+    for step in range(N * R):
+        c = rng.integers(N)                        # a random country reconsiders
+        share = np.bincount(choice, minlength=K) / N
+        score = (s * share                         # weight on others' choices
+                 + (1 - s) * preference[c]         # weight on its own preference
+                 + rng.normal(0, 0.02, K))         # small random influences
+        choice[c] = np.argmax(score)
+        if (step + 1) % N == 0:                    # record once per round
+            history.append(np.bincount(choice, minlength=K) / N)
+
+    history = np.array(history)
+    final = history[-1]
+    return {
+        "history": history.T.tolist(),             # one row per currency
+        "final": final.tolist(),
+        "wide_use": int((final >= 0.1).sum()),
+        "leader": int(final.argmax()),
+        "leader_share": float(final.max()),
+    }
+
+result = currency_competition(s, R)
+result`;
+
+const LETTERS = ["A", "B", "C", "D", "E"];
+const COLORS = ["#4b2f82", "#e0a526", "#2f7a4d", "#a3312a", "#1a6f8a"];
+const $ = (id) => document.getElementById(id);
+let pyodide = null;
+let lockedPrediction = null;
+let runs = 0, singleRuns = 0, lastDefault = null;
+const BASE_LAYOUT = {
+  margin: { l: 70, r: 20, t: 20, b: 60 },
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor: "#f8f5fd",
+  font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+};
+
+function syncLabels() {
+  $("networkOut").textContent = $("network").value + "%";
+  $("roundsOut").textContent = $("rounds").value;
+}
+["network", "rounds"].forEach((id) => $(id).addEventListener("input", syncLabels));
+syncLabels();
+$("codeView").textContent = PY_MODEL;
+
+// Step 1
+$("lockPrediction").addEventListener("click", () => {
+  const picked = document.querySelector('input[name="pred"]:checked');
+  if (!picked) {
+    $("predictionStatus").textContent = "Select one outcome before locking in.";
+    $("predictionStatus").className = "status error";
+    return;
+  }
+  lockedPrediction = picked.value;
+  document.querySelectorAll('input[name="pred"]').forEach((el) => {
+    el.disabled = true;
+    el.closest(".choice").classList.add("locked");
+  });
+  picked.closest(".choice").classList.add("picked");
+  $("lockPrediction").disabled = true;
+  $("predictionStatus").textContent = "Prediction recorded.";
+  $("predictionStatus").className = "status ready";
+});
+
+// Step 3
+async function startEngine() {
+  try {
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/" });
+    await pyodide.loadPackage("numpy");
+    $("engineStatus").textContent = "Python engine ready.";
+    $("engineStatus").className = "status ready";
+    $("runBtn").disabled = false;
+  } catch (err) {
+    $("engineStatus").textContent = "The Python engine could not load. Check the internet connection and reload the page.";
+    $("engineStatus").className = "status error";
+    console.error(err);
+  }
+}
+
+function runModel() {
+  const s = Number($("network").value) / 100;
+  const R = Number($("rounds").value);
+  pyodide.globals.set("s", s);
+  pyodide.globals.set("R", R);
+  const proxy = pyodide.runPython(PY_MODEL);
+  const r = proxy.toJs({ dict_converter: Object.fromEntries });
+  proxy.destroy();
+
+  runs += 1;
+  if (r.wide_use === 1) singleRuns += 1;
+  $("statWide").textContent = r.wide_use;
+  $("statLead").textContent = Math.round(r.leader_share * 100) + "%";
+  $("statWinner").textContent = "Currency " + LETTERS[r.leader];
+  $("statRuns").textContent = singleRuns + " of " + runs;
+
+  const rounds = r.history[0].map((_, k) => k);
+  Plotly.react("pathChart", r.history.map((row, j) => ({
+    x: rounds, y: row.map((v) => v * 100), name: "Currency " + LETTERS[j], mode: "lines",
+    line: { color: COLORS[j], width: j === r.leader ? 3.5 : 2 },
+    hovertemplate: "Round %{x}<br>%{y:.0f}% of countries<extra></extra>",
+  })), {
+    ...BASE_LAYOUT,
+    xaxis: { title: "Round", gridcolor: "#e6def5" },
+    yaxis: { title: "Share of countries using the currency", gridcolor: "#e6def5", range: [0, 102], ticksuffix: "%" },
+    legend: { orientation: "h", y: -0.25 },
+  }, { responsive: true, displayModeBar: false });
+
+  if (Math.abs(s - 0.6) < 1e-9) lastDefault = r.wide_use;
+  reconcile(s);
+}
+
+// Step 4. Published data
+function drawData() {
+  const measures = ["Share of official reserves", "Share of currency trades"];
+  const data = [
+    { name: "US dollar", y: [57.1, 89.2], color: "#4b2f82" },
+    { name: "Euro", y: [20.0, 28.9], color: "#e0a526" },
+    { name: "Chinese renminbi", y: [2.0, 8.5], color: "#2f7a4d" },
+  ];
+  Plotly.react("dataChart", data.map((d) => ({
+    type: "bar", name: d.name, x: measures, y: d.y, marker: { color: d.color },
+    text: d.y.map((v) => v.toFixed(1) + "%"), textposition: "outside",
+    hovertemplate: d.name + "<br>%{x}<br>%{y:.1f}%<extra></extra>",
+  })), {
+    ...BASE_LAYOUT,
+    barmode: "group",
+    yaxis: { title: "Percent", gridcolor: "#e6def5", range: [0, 100], ticksuffix: "%" },
+    legend: { orientation: "h", y: -0.15 },
+  }, { responsive: true, displayModeBar: false });
+}
+
+// Step 5
+function reconcile(s) {
+  if (lockedPrediction === null) {
+    $("reconcileText").textContent = "Lock in a prediction in Step 1 to compare it with the model.";
+    return;
+  }
+  if (lastDefault === null) {
+    $("reconcileText").textContent = "Your prediction referred to a weight of 60 percent. Return the slider to 60 percent and run the model to compare.";
+    return;
+  }
+  const outcome = lastDefault === 1 ? "a single currency" : lastDefault + " currencies";
+  let text = "At a weight of 60 percent, your most recent run ended with " + outcome + " in wide use. ";
+  if (lockedPrediction === "1") {
+    text += "This matches your prediction. Consider why a modest tilt toward other countries' choices was enough to eliminate four currencies entirely.";
+  } else {
+    text += "You predicted " + (lockedPrediction === "3" ? "three or four" : lockedPrediction === "5" ? "all five" : "two") +
+      ". Consider why a modest tilt toward other countries' choices was enough to overwhelm each country's own preferences.";
+  }
+  text += " Then lower the weight step by step and find the point at which several currencies survive.";
+  $("reconcileText").textContent = text;
+}
+
+$("runBtn").addEventListener("click", runModel);
+drawData();
+startEngine();
+</script>
+</body>
+</html>
