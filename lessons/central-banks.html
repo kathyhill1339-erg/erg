@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central banks and the money supply | erg</title>
+<link rel="icon" href="../assets/bee.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/erg.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img src="../assets/bee.svg" alt="">
+      <span class="wordmark">erg</span>
+    </a>
+    <nav class="site-nav">
+      <a href="../index.html#modules">All modules</a>
+    </nav>
+  </div>
+</header>
+
+<section class="lesson-head">
+  <div class="wrap">
+    <span class="module-num">Module 3</span>
+    <h1>Central banks and the money supply</h1>
+    <p>Module 2 showed that rising prices erode savings. This module asks where new money comes from, and whether it matters who receives it first. You will trace the entry points, then model new money as it spreads through an economy.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <!-- STEP 1. Predict -->
+    <section class="step">
+      <h2><span class="n">1</span>Commit to a prediction</h2>
+      <p>Imagine an economy divided into ten groups of people with equal incomes. New money equal to 10 percent of the existing money supply enters the economy through Group 1. Group 1 spends it, which raises the income of Group 2, and so on, until the new money has reached all ten groups. By the end, every income and every price has risen by 10 percent.</p>
+      <p>Over the whole period while the money is spreading, which outcome do you expect?</p>
+      <div class="choices" id="choices">
+        <label class="choice"><input type="radio" name="pred" value="a"><span>Every group gains, because every group ends up with 10 percent more income.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="b"><span>Every group loses equally, because prices rise for everyone.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="c"><span>Groups that receive the money early gain, and groups that receive it late lose.</span></label>
+        <label class="choice"><input type="radio" name="pred" value="d"><span>No group gains or loses, because incomes and prices rise by the same amount.</span></label>
+      </div>
+      <button class="btn secondary" id="lockPrediction">Lock in my prediction</button>
+      <p class="status" id="predictionStatus"></p>
+    </section>
+
+    <!-- STEP 2. Entry points -->
+    <section class="step">
+      <h2><span class="n">2</span>Trace where new money enters</h2>
+      <p>New money does not arrive in everyone's account at once. It enters through specific channels, and each channel has identifiable first recipients. Three channels account for most new money in modern economies.</p>
+      <div class="channels">
+        <div class="channel">
+          <h3>Commercial bank lending</h3>
+          <p>When a commercial bank makes a loan, it credits the borrower's account with a new deposit. That deposit is new money. The Bank of England has described this as the principal way money is created in modern economies.</p>
+          <p class="first">First recipients are borrowers, and the sellers of whatever they buy, such as homes and businesses.</p>
+        </div>
+        <div class="channel">
+          <h3>Central bank asset purchases</h3>
+          <p>A central bank can buy government bonds and other financial assets and pay for them with newly created reserves. Large programs of this kind, called quantitative easing, were used widely after 2008 and again in 2020.</p>
+          <p class="first">First recipients are banks and investment funds that sell the assets, and owners of financial assets whose prices rise.</p>
+        </div>
+        <div class="channel">
+          <h3>Government borrowing</h3>
+          <p>When a government spends more than it collects in taxes, it borrows by selling bonds. When banks or the central bank buy those bonds, new money is created and flows out through government spending.</p>
+          <p class="first">First recipients are government contractors, employees, and people who receive government payments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3. Model -->
+    <section class="step">
+      <h2><span class="n">3</span>Model the spread of new money</h2>
+      <p>The model follows ten groups, each earning one unit of income per month. New money reaches Group 1 in the first month and then reaches one additional group at a fixed interval. When a group is reached, its monthly income rises by the size of the injection. The price level rises in step with the share of groups already reached, so that total spending always buys the same total quantity of goods. The model measures each group's real income, meaning what its income can actually buy at current prices.</p>
+
+      <div class="controls">
+        <div>
+          <label for="injection">New money as a share of existing money <output id="injectionOut">10%</output></label>
+          <input type="range" id="injection" min="1" max="50" step="1" value="10">
+        </div>
+        <div>
+          <label for="interval">Months before the money reaches the next group <output id="intervalOut">3</output></label>
+          <input type="range" id="interval" min="1" max="12" step="1" value="3">
+        </div>
+      </div>
+
+      <button class="btn" id="runBtn" disabled>Run the model</button>
+      <p class="status" id="engineStatus">Loading the Python engine. This takes several seconds on the first visit.</p>
+
+      <div class="results">
+        <div class="stat"><div class="label">Group 1 change, in months of income</div><div class="value" id="statFirst">...</div></div>
+        <div class="stat"><div class="label">Group 10 change, in months of income</div><div class="value" id="statLast">...</div></div>
+        <div class="stat"><div class="label">Final rise in prices</div><div class="value" id="statPrice">...</div></div>
+        <div class="stat"><div class="label">All gains and losses combined</div><div class="value" id="statTotal">...</div></div>
+      </div>
+
+      <div id="gainChart" class="chart"></div>
+      <p class="status">Each bar is the total change in a group's real income over the whole period, measured in months of its original income.</p>
+
+      <div id="pathChart" class="chart" style="margin-top:18px;"></div>
+      <p class="status">Real income of the first, middle, and last groups over time, as a percentage of original purchasing power. The dashed line is the price level.</p>
+    </section>
+
+    <!-- STEP 4. Reconcile -->
+    <section class="step">
+      <h2><span class="n">4</span>Reconcile the model with your prediction</h2>
+      <p id="reconcileText">Lock in a prediction in Step 1, then run the model to compare.</p>
+
+      <details>
+        <summary>Why do early recipients gain?</summary>
+        <p>Group 1 spends its new money while prices have barely begun to rise, so the money buys nearly its full original value. By the time the money reaches Group 10, prices have already risen, but Group 10's income has not. For many months Group 10 pays higher prices out of an unchanged income. The effect is named after Richard Cantillon, an eighteenth-century economist who first described it.</p>
+      </details>
+
+      <details>
+        <summary>Why do the gains and losses cancel?</summary>
+        <p>New money does not create new goods. In the model, the economy produces the same quantity of goods every month, so any extra goods one group buys must come from another group buying fewer. The injection therefore redistributes purchasing power without increasing the total. Once the money has reached every group, incomes and prices have risen by the same percentage and no group is better or worse off than before. The redistribution happens entirely during the transition.</p>
+      </details>
+
+      <details>
+        <summary>How large is this effect in real economies?</summary>
+        <p>Economists agree that the channel of entry shapes who benefits first, but they disagree about the size and importance of the effect. Research on quantitative easing, for example, finds that it raised the prices of stocks and bonds, which benefits people who already own those assets. Other research finds that it also lowered unemployment, which benefits working households. Whether the net result widened or narrowed inequality remains an open empirical question. This model isolates the timing effect and ignores those other channels by design.</p>
+      </details>
+
+      <details>
+        <summary>What does this model leave out?</summary>
+        <p>The model assumes a fixed quantity of goods, a single fixed path for the money, prices that respond immediately to spending, and no borrowing, interest, or changes in employment. Real economies violate each of these assumptions. Consider which assumption, if relaxed, would most change the result.</p>
+      </details>
+
+      <div class="callout">
+        <strong>Question to carry forward.</strong> The groups in this model all use the same currency. What happens when new money is created in a currency that people and governments around the world must use to trade with one another? Module 4 examines reserve currencies and global trade.
+      </div>
+    </section>
+
+    <!-- STEP 5. Inspect -->
+    <section class="step">
+      <h2><span class="n">5</span>Inspect the code</h2>
+      <p>Nothing on this page is hidden. The Python below is the exact code that produced your results, running in your browser through Pyodide.</p>
+      <details>
+        <summary>Show the Python model</summary>
+        <pre id="codeView" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+    </section>
+
+    <p style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <a class="btn secondary" href="purchasing-power.html" style="text-decoration:none;display:inline-block;">Previous module, Purchasing power over time</a>
+      <a class="btn secondary" href="../index.html#modules" style="text-decoration:none;display:inline-block;">All modules</a>
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">erg is an educational project. Nothing on this site constitutes financial advice.</div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// The Python model. Kept as a plain string so learners can read it in Step 5.
+// Inputs arrive as globals g (injection share) and d (months between groups).
+// ---------------------------------------------------------------------------
+const PY_MODEL = `import numpy as np
+
+def spread_new_money(g, d, N=10):
+    T = N * d + 6                         # months simulated
+    t = np.arange(1, T + 1)               # month numbers 1..T
+    reached_at = np.arange(N) * d + 1     # month each group is reached
+
+    # How many groups have been reached by each month
+    reached = (reached_at[None, :] <= t[:, None]).sum(axis=1)
+
+    # Prices rise with the share of groups already reached,
+    # so total spending always buys the same total quantity of goods.
+    price = 1 + g * reached / N
+
+    # Monthly income is 1, rising to 1 + g once a group is reached.
+    income = 1 + g * (t[:, None] >= reached_at[None, :])
+
+    # Real income is what that income buys at current prices.
+    real = income / price[:, None]
+
+    # Total gain or loss over the period, in months of original income.
+    gain = (real - 1).sum(axis=0)
+
+    return {
+        "t": t.tolist(),
+        "price": price.tolist(),
+        "real_first": real[:, 0].tolist(),
+        "real_middle": real[:, N // 2 - 1].tolist(),
+        "real_last": real[:, -1].tolist(),
+        "gain": gain.tolist(),
+        "total": float(gain.sum()),
+    }
+
+result = spread_new_money(g, d)
+result`;
+
+const $ = (id) => document.getElementById(id);
+let pyodide = null;
+let lockedPrediction = null;
+const fmt = (x, dgt) => x.toLocaleString("en-US", { minimumFractionDigits: dgt, maximumFractionDigits: dgt });
+
+function syncLabels() {
+  $("injectionOut").textContent = $("injection").value + "%";
+  $("intervalOut").textContent = $("interval").value;
+}
+["injection", "interval"].forEach((id) => $(id).addEventListener("input", syncLabels));
+syncLabels();
+$("codeView").textContent = PY_MODEL;
+
+// Step 1
+$("lockPrediction").addEventListener("click", () => {
+  const picked = document.querySelector('input[name="pred"]:checked');
+  if (!picked) {
+    $("predictionStatus").textContent = "Select one outcome before locking in.";
+    $("predictionStatus").className = "status error";
+    return;
+  }
+  lockedPrediction = picked.value;
+  document.querySelectorAll('input[name="pred"]').forEach((el) => {
+    el.disabled = true;
+    el.closest(".choice").classList.add("locked");
+  });
+  picked.closest(".choice").classList.add("picked");
+  $("lockPrediction").disabled = true;
+  $("predictionStatus").textContent = "Prediction recorded.";
+  $("predictionStatus").className = "status ready";
+});
+
+// Step 3
+async function startEngine() {
+  try {
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/" });
+    await pyodide.loadPackage("numpy");
+    $("engineStatus").textContent = "Python engine ready.";
+    $("engineStatus").className = "status ready";
+    $("runBtn").disabled = false;
+  } catch (err) {
+    $("engineStatus").textContent = "The Python engine could not load. Check the internet connection and reload the page.";
+    $("engineStatus").className = "status error";
+    console.error(err);
+  }
+}
+
+function runModel() {
+  const g = Number($("injection").value) / 100;
+  const d = Number($("interval").value);
+  pyodide.globals.set("g", g);
+  pyodide.globals.set("d", d);
+  const proxy = pyodide.runPython(PY_MODEL);
+  const r = proxy.toJs({ dict_converter: Object.fromEntries });
+  proxy.destroy();
+
+  const signed = (x) => (x >= 0 ? "+" : "−") + fmt(Math.abs(x), 2);
+  $("statFirst").textContent = signed(r.gain[0]);
+  $("statLast").textContent = signed(r.gain[r.gain.length - 1]);
+  $("statPrice").textContent = fmt(g * 100, 0) + "%";
+  // Floating-point sums land within about 1e-15 of zero; display that as zero.
+  $("statTotal").textContent = fmt(Math.abs(r.total) < 1e-9 ? 0 : r.total, 2);
+
+  drawCharts(r);
+  reconcile();
+}
+
+const BASE_LAYOUT = {
+  margin: { l: 70, r: 20, t: 20, b: 60 },
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor: "#f8f5fd",
+  font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+};
+
+function drawCharts(r) {
+  const groups = r.gain.map((_, k) => "Group " + (k + 1));
+  Plotly.react("gainChart", [{
+    type: "bar",
+    x: groups,
+    y: r.gain,
+    marker: { color: r.gain.map((v) => (v >= 0 ? "#e0a526" : "#4b2f82")) },
+    hovertemplate: "%{x}<br>%{y:+.2f} months of income<extra></extra>",
+  }], {
+    ...BASE_LAYOUT,
+    xaxis: { title: "Order in which groups receive the new money", gridcolor: "#e6def5" },
+    yaxis: { title: "Gain or loss, months of income", gridcolor: "#e6def5", zeroline: true, zerolinecolor: "#736b88" },
+    showlegend: false,
+  }, { responsive: true, displayModeBar: false });
+
+  const pct = (arr) => arr.map((v) => v * 100);
+  Plotly.react("pathChart", [
+    { x: r.t, y: pct(r.real_first), name: "Group 1 real income", mode: "lines", line: { color: "#e0a526", width: 3, shape: "hv" } },
+    { x: r.t, y: pct(r.real_middle), name: "Group 5 real income", mode: "lines", line: { color: "#8a6fc9", width: 2, shape: "hv" } },
+    { x: r.t, y: pct(r.real_last), name: "Group 10 real income", mode: "lines", line: { color: "#4b2f82", width: 3, shape: "hv" } },
+    { x: r.t, y: pct(r.price), name: "Price level", mode: "lines", line: { color: "#736b88", width: 2, dash: "dash", shape: "hv" } },
+  ], {
+    ...BASE_LAYOUT,
+    xaxis: { title: "Month", gridcolor: "#e6def5" },
+    yaxis: { title: "Percent of starting level", gridcolor: "#e6def5", ticksuffix: "%" },
+    legend: { orientation: "h", y: -0.25 },
+  }, { responsive: true, displayModeBar: false });
+}
+
+// Step 4
+const FEEDBACK = {
+  a: "You predicted that every group gains. Every group does end with a higher income, but prices rise by the same percentage, so the higher income buys no more than before. The bar chart shows that the early groups gain only at the expense of the later ones.",
+  b: "You predicted that every group loses equally. The bar chart shows that the losses fall only on the later groups, while the earliest groups gain. The combined total is zero, so the injection moves purchasing power between groups rather than destroying it.",
+  c: "You predicted that early recipients gain and late recipients lose, which is what the model shows. Notice also that the gains and losses sum to zero. The new money transfers purchasing power from later groups to earlier ones without creating any additional goods.",
+  d: "You predicted that no group gains or loses. That is true once the money has reached everyone, because incomes and prices have then risen by the same amount. During the transition, however, the bar chart shows that early groups gain and late groups lose. The final state is neutral, but the path to it is not.",
+};
+function reconcile() {
+  if (lockedPrediction === null) {
+    $("reconcileText").textContent = "Lock in a prediction in Step 1 to compare it with the model.";
+    return;
+  }
+  $("reconcileText").textContent = FEEDBACK[lockedPrediction] + " Try a larger injection or a slower spread to see how each changes the size of the transfer.";
+}
+
+$("runBtn").addEventListener("click", runModel);
+startEngine();
+</script>
+</body>
+</html>
