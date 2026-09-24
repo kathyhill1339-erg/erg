@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="erg bee mark">
+  <!-- wings -->
+  <ellipse cx="24" cy="18" rx="11" ry="8" transform="rotate(-25 24 18)" fill="#ddd2f3" opacity="0.9"/>
+  <ellipse cx="40" cy="18" rx="11" ry="8" transform="rotate(25 40 18)" fill="#ddd2f3" opacity="0.9"/>
+  <!-- body -->
+  <ellipse cx="32" cy="38" rx="14" ry="18" fill="#e0a526"/>
+  <!-- stripes -->
+  <path d="M19 32 Q32 36 45 32 L45.6 36.5 Q32 40.5 18.4 36.5 Z" fill="#2a1a4a"/>
+  <path d="M18.6 42 Q32 46 45.4 42 L44 46.8 Q32 50.5 20 46.8 Z" fill="#2a1a4a"/>
+  <!-- head -->
+  <circle cx="32" cy="20" r="7" fill="#2a1a4a"/>
+  <!-- stinger -->
+  <path d="M29.5 55 L32 61 L34.5 55 Z" fill="#2a1a4a"/>
+</svg>

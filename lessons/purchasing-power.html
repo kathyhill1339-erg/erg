@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purchasing power over time | erg</title>
+<link rel="icon" href="../assets/bee.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/erg.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img src="../assets/bee.svg" alt="">
+      <span class="wordmark">erg</span>
+    </a>
+    <nav class="site-nav">
+      <a href="../index.html#modules">All modules</a>
+    </nav>
+  </div>
+</header>
+
+<section class="lesson-head">
+  <div class="wrap">
+    <span class="module-num">Module 2</span>
+    <h1>Purchasing power over time</h1>
+    <p>A dollar kept in a drawer never changes its number, yet it steadily buys less. In this investigation you will predict, model, and measure how much less.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <!-- STEP 1. Predict -->
+    <section class="step">
+      <h2><span class="n">1</span>Commit to a prediction</h2>
+      <p>Suppose prices across the economy rise by 3 percent each year. You place $100 in a drawer today and open it in 30 years. The bill still reads $100, but how much of today's goods will it buy?</p>
+      <p>Enter your best estimate in today's dollars before you run any calculation. A recorded prediction makes the result more informative, because it reveals where your intuition is accurate and where it is not.</p>
+      <div class="controls">
+        <div>
+          <label for="prediction">My prediction, in today's dollars</label>
+          <input type="number" id="prediction" min="0" max="100" step="1" placeholder="e.g. 70">
+        </div>
+      </div>
+      <button class="btn secondary" id="lockPrediction">Lock in my prediction</button>
+      <p class="status" id="predictionStatus"></p>
+    </section>
+
+    <!-- STEP 2. Model -->
+    <section class="step">
+      <h2><span class="n">2</span>Build the model</h2>
+      <p>Each year, prices are multiplied by (1 + <em>i</em>), where <em>i</em> is the annual inflation rate. A fixed sum of money therefore buys 1 / (1 + <em>i</em>) as much as it did the year before. After <em>t</em> years, its value in today's dollars is <strong>P / (1 + <em>i</em>)<sup><em>t</em></sup></strong>.</p>
+      <p>Adjust the inputs, then run the model. The dashed line shows a 2 percent reference rate, the inflation target that the U.S. Federal Reserve, the European Central Bank, and the Bank of England each use.</p>
+
+      <div class="controls">
+        <div>
+          <label for="amount">Starting amount <output id="amountOut">$100</output></label>
+          <input type="range" id="amount" min="10" max="1000" step="10" value="100">
+        </div>
+        <div>
+          <label for="rate">Annual inflation rate <output id="rateOut">3.0%</output></label>
+          <input type="range" id="rate" min="0" max="15" step="0.5" value="3">
+        </div>
+        <div>
+          <label for="years">Years <output id="yearsOut">30</output></label>
+          <input type="range" id="years" min="1" max="60" step="1" value="30">
+        </div>
+      </div>
+
+      <button class="btn" id="runBtn" disabled>Run the model</button>
+      <p class="status" id="engineStatus">Loading the Python engine. This takes several seconds on the first visit.</p>
+
+      <div class="results">
+        <div class="stat"><div class="label">Value in today's dollars</div><div class="value" id="statValue">...</div></div>
+        <div class="stat"><div class="label">Purchasing power lost</div><div class="value" id="statLost">...</div></div>
+        <div class="stat"><div class="label">Years until value halves</div><div class="value" id="statHalf">...</div></div>
+        <div class="stat"><div class="label">Rule of 72 estimate</div><div class="value" id="statRule">...</div></div>
+      </div>
+
+      <div id="chart" class="chart"></div>
+    </section>
+
+    <!-- STEP 3. Reconcile -->
+    <section class="step">
+      <h2><span class="n">3</span>Reconcile the model with your prediction</h2>
+      <p id="reconcileText">Lock in a prediction in Step 1, then run the model with 3 percent over 30 years to compare.</p>
+
+      <details>
+        <summary>Why do most people overestimate the remaining value?</summary>
+        <p>Intuition tends to treat inflation as a fixed amount subtracted each year, which is a linear process. Inflation instead compounds, because each year's price increase applies to prices that have already risen. Compounding is gentle at first and severe over long periods, so short-horizon experience gives a misleading sense of the long-horizon result.</p>
+      </details>
+
+      <details>
+        <summary>How good is the Rule of 72?</summary>
+        <p>The Rule of 72 estimates the halving time as 72 divided by the percentage rate. Compare it with the exact value in Step 2 at several rates. The approximation is close for rates between about 4 and 12 percent and drifts at very low and very high rates. Consider why a shortcut designed for mental arithmetic would favor a number such as 72, which divides evenly by 2, 3, 4, 6, 8, 9, and 12.</p>
+      </details>
+
+      <div class="callout">
+        <strong>Question to carry forward.</strong> If money reliably loses purchasing power, what does a person need to do with savings simply to keep pace, and who in the economy benefits when prices rise? Module 3 examines where new money comes from and who receives it first.
+      </div>
+    </section>
+
+    <!-- STEP 4. Inspect -->
+    <section class="step">
+      <h2><span class="n">4</span>Inspect the code</h2>
+      <p>Nothing on this page is hidden. The Python below is the exact code that produced your results, running in your browser through Pyodide.</p>
+      <details>
+        <summary>Show the Python model</summary>
+        <pre id="codeView" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">erg is an educational project. Nothing on this site constitutes financial advice.</div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// The Python model. Kept as a plain string so students can read it in Step 4.
+// Inputs arrive as globals P, i, T. Output is a dict returned to JavaScript.
+// ---------------------------------------------------------------------------
+const PY_MODEL = `import numpy as np
+
+def purchasing_power(P, i, T):
+    t = np.arange(0, T + 1)
+    value = P / (1 + i) ** t            # value in today's dollars
+    reference = P / (1 + 0.02) ** t     # 2 percent reference path
+
+    if i > 0:
+        half_life = np.log(2) / np.log(1 + i)   # exact halving time
+        rule_72 = 72 / (i * 100)                # mental-math estimate
+    else:
+        half_life = None
+        rule_72 = None
+
+    return {
+        "t": t.tolist(),
+        "value": value.round(2).tolist(),
+        "reference": reference.round(2).tolist(),
+        "final": float(value[-1]),
+        "lost_pct": float(100 * (1 - value[-1] / P)),
+        "half_life": None if half_life is None else float(half_life),
+        "rule_72": None if rule_72 is None else float(rule_72),
+    }
+
+result = purchasing_power(P, i, T)
+result`;
+
+const $ = (id) => document.getElementById(id);
+let pyodide = null;
+let lockedPrediction = null;
+
+// Live labels for the sliders
+function syncLabels() {
+  $("amountOut").textContent = "$" + $("amount").value;
+  $("rateOut").textContent = Number($("rate").value).toFixed(1) + "%";
+  $("yearsOut").textContent = $("years").value;
+}
+["amount", "rate", "years"].forEach((id) => $(id).addEventListener("input", syncLabels));
+syncLabels();
+
+$("codeView").textContent = PY_MODEL;
+
+// Step 1. Lock in a prediction
+$("lockPrediction").addEventListener("click", () => {
+  const v = parseFloat($("prediction").value);
+  if (isNaN(v) || v < 0) {
+    $("predictionStatus").textContent = "Enter a number of dollars before locking in.";
+    $("predictionStatus").className = "status error";
+    return;
+  }
+  lockedPrediction = v;
+  $("prediction").disabled = true;
+  $("lockPrediction").disabled = true;
+  $("predictionStatus").textContent = "Prediction recorded as $" + v.toFixed(0) + ".";
+  $("predictionStatus").className = "status ready";
+});
+
+// Step 2. Load Pyodide once, then run the model on demand
+async function startEngine() {
+  try {
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/" });
+    await pyodide.loadPackage("numpy");
+    $("engineStatus").textContent = "Python engine ready.";
+    $("engineStatus").className = "status ready";
+    $("runBtn").disabled = false;
+  } catch (err) {
+    $("engineStatus").textContent = "The Python engine could not load. Check the internet connection and reload the page.";
+    $("engineStatus").className = "status error";
+    console.error(err);
+  }
+}
+
+function fmtMoney(x) {
+  return "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function runModel() {
+  const P = Number($("amount").value);
+  const i = Number($("rate").value) / 100;
+  const T = Number($("years").value);
+
+  pyodide.globals.set("P", P);
+  pyodide.globals.set("i", i);
+  pyodide.globals.set("T", T);
+  const proxy = pyodide.runPython(PY_MODEL);
+  const r = proxy.toJs({ dict_converter: Object.fromEntries });
+  proxy.destroy();
+
+  $("statValue").textContent = fmtMoney(r.final);
+  $("statLost").textContent = r.lost_pct.toFixed(1) + "%";
+  $("statHalf").textContent = r.half_life == null ? "Never" : r.half_life.toFixed(1);
+  $("statRule").textContent = r.rule_72 == null ? "Never" : r.rule_72.toFixed(1);
+
+  drawChart(r, P, i);
+  reconcile(r, P, i, T);
+}
+
+function drawChart(r, P, i) {
+  const traces = [
+    {
+      x: r.t, y: r.value, name: (i * 100).toFixed(1) + "% inflation",
+      mode: "lines", line: { color: "#4b2f82", width: 3 },
+      hovertemplate: "Year %{x}<br>$%{y:.2f}<extra></extra>",
+    },
+    {
+      x: r.t, y: r.reference, name: "2% reference",
+      mode: "lines", line: { color: "#e0a526", width: 2, dash: "dash" },
+      hovertemplate: "Year %{x}<br>$%{y:.2f}<extra></extra>",
+    },
+  ];
+  const layout = {
+    margin: { l: 60, r: 20, t: 20, b: 50 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "#f8f5fd",
+    font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+    xaxis: { title: "Years from today", gridcolor: "#e6def5" },
+    yaxis: { title: "Value in today's dollars", gridcolor: "#e6def5", rangemode: "tozero", tickprefix: "$" },
+    legend: { orientation: "h", y: -0.22 },
+  };
+  Plotly.react("chart", traces, layout, { responsive: true, displayModeBar: false });
+}
+
+// Step 3. Compare prediction with the model at the benchmark settings
+function reconcile(r, P, i, T) {
+  const benchmark = P === 100 && Math.abs(i - 0.03) < 1e-9 && T === 30;
+  if (lockedPrediction === null) {
+    $("reconcileText").textContent = "Lock in a prediction in Step 1 to compare it with the model.";
+    return;
+  }
+  if (!benchmark) {
+    $("reconcileText").textContent = "Your prediction referred to $100 at 3 percent over 30 years. Return the inputs to those values and run the model again to compare.";
+    return;
+  }
+  const gap = lockedPrediction - r.final;
+  const direction = gap > 0 ? "above" : "below";
+  $("reconcileText").textContent =
+    "You predicted $" + lockedPrediction.toFixed(0) + ". The model gives " + fmtMoney(r.final) +
+    ", so your estimate was " + fmtMoney(Math.abs(gap)) + " " + direction + " the modeled value. " +
+    "Consider what reasoning produced your estimate, and which part of that reasoning the model contradicts.";
+}
+
+$("runBtn").addEventListener("click", runModel);
+startEngine();
+</script>
+</body>
+</html>
