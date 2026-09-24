@@ -20,14 +20,15 @@ The site uses a deliberately simple architecture so that it costs nothing to hos
 index.html                     Home page and module list
 assets/erg.css                 Shared brand stylesheet (colors, fonts, components)
 assets/bee.svg                 Bee mark used in the header and browser tab
-lessons/purchasing-power.html  Module 2, the first complete lesson and the template for new ones
+lessons/what-is-money.html     Module 1, barter and money simulation with property scoring
+lessons/purchasing-power.html  Module 2, inflation model and the simplest template for new modules
 .nojekyll                      Tells GitHub Pages to serve files as they are
 ```
 
 ## Adding a new module
 
-1. Copy `lessons/purchasing-power.html` to a new file in `lessons/`, such as `lessons/what-is-money.html`.
-2. Replace the lesson text in each of the four steps (predict, model, reconcile, inspect).
+1. Copy `lessons/purchasing-power.html` to a new file in `lessons/`, such as `lessons/central-banks.html`.
+2. Replace the lesson text in each step. Every module follows the sequence predict, model, reconcile, and inspect, and a module may add further steps as Module 1 does.
 3. Replace the Python in the `PY_MODEL` string with the new model. The model receives its inputs as Python globals and returns a dictionary to JavaScript.
 4. Update the chart and results panels to display the new outputs.
 5. In `index.html`, change the module's card from a `div` with the class `planned` to a link (`a`) that points to the new file, and change its tag to "Available".

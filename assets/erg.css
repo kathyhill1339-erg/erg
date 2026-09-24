@@ -313,3 +313,32 @@ details p { margin-top: 10px; }
   .site-nav a { margin-left: 12px; }
   .step { padding: 20px; }
 }
+
+/* Select menus and score tables */
+select {
+  width: 100%;
+  font: inherit;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 15px;
+}
+.score-table th, .score-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.score-table th {
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.btn + .btn { margin-left: 8px; }

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is money? | erg</title>
+<link rel="icon" href="../assets/bee.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/erg.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../index.html">
+      <img src="../assets/bee.svg" alt="">
+      <span class="wordmark">erg</span>
+    </a>
+    <nav class="site-nav">
+      <a href="../index.html#modules">All modules</a>
+    </nav>
+  </div>
+</header>
+
+<section class="lesson-head">
+  <div class="wrap">
+    <span class="module-num">Module 1</span>
+    <h1>What is money?</h1>
+    <p>Money is so familiar that it rarely seems to need an explanation. In this investigation you will model a village that trades without money, measure what money changes, and then judge which objects in history have served the role well.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <!-- STEP 1. Predict -->
+    <section class="step">
+      <h2><span class="n">1</span>Commit to a prediction</h2>
+      <p>Imagine a village where every trader makes one good and wants one different good. There are 20 kinds of goods, and nobody uses money. Two traders who meet can trade only if each one has exactly what the other wants, a condition economists call a double coincidence of wants.</p>
+      <p>Out of 1,000 chance meetings between traders, how many do you expect to end in a successful trade? Record your estimate before running the model.</p>
+      <div class="controls">
+        <div>
+          <label for="prediction">My prediction, in trades per 1,000 meetings</label>
+          <input type="number" id="prediction" min="0" max="1000" step="1" placeholder="e.g. 50">
+        </div>
+      </div>
+      <button class="btn secondary" id="lockPrediction">Lock in my prediction</button>
+      <p class="status" id="predictionStatus"></p>
+    </section>
+
+    <!-- STEP 2. Model -->
+    <section class="step">
+      <h2><span class="n">2</span>Simulate barter and money</h2>
+      <p>The model creates a large number of random meetings. In each meeting, both traders are assigned a good they make and a different good they want. Under <strong>barter</strong>, a trade succeeds only when each trader wants what the other makes. Under <strong>money</strong>, a trade succeeds whenever the second trader makes what the first trader wants, because the first trader can pay with money instead of goods.</p>
+      <p>Change the number of goods to see how the gap between the two systems grows as an economy becomes more specialized.</p>
+
+      <div class="controls">
+        <div>
+          <label for="goods">Kinds of goods in the village <output id="goodsOut">20</output></label>
+          <input type="range" id="goods" min="2" max="100" step="1" value="20">
+        </div>
+        <div>
+          <label for="meetings">Random meetings simulated <output id="meetingsOut">100,000</output></label>
+          <input type="range" id="meetings" min="1000" max="200000" step="1000" value="100000">
+        </div>
+      </div>
+
+      <button class="btn" id="runBtn" disabled>Run the simulation</button>
+      <p class="status" id="engineStatus">Loading the Python engine. This takes several seconds on the first visit.</p>
+
+      <div class="results">
+        <div class="stat"><div class="label">Barter trades per 1,000 meetings</div><div class="value" id="statBarter">...</div></div>
+        <div class="stat"><div class="label">Money trades per 1,000 meetings</div><div class="value" id="statMoney">...</div></div>
+        <div class="stat"><div class="label">How many times more trades money allows</div><div class="value" id="statRatio">...</div></div>
+        <div class="stat"><div class="label">Prices to remember, barter compared with money</div><div class="value" id="statPrices">...</div></div>
+      </div>
+
+      <div id="chart" class="chart"></div>
+      <p class="status">Lines show the exact probabilities for every village size. The points show your simulation. The vertical axis uses a logarithmic scale, so each gridline is ten times the one below it.</p>
+    </section>
+
+    <!-- STEP 3. Reconcile -->
+    <section class="step">
+      <h2><span class="n">3</span>Reconcile the model with your prediction</h2>
+      <p id="reconcileText">Lock in a prediction in Step 1, then run the simulation with 20 goods to compare.</p>
+
+      <details>
+        <summary>Why is barter so much harder than it seems?</summary>
+        <p>A barter trade requires two separate matches at once. The other trader must make what you want, and must also want what you make. With 20 goods, the first match happens in about 1 meeting out of 20, and the second happens in only about 1 out of 19 of those. Multiplying the two gives roughly 1 successful meeting in 380. Money removes the second requirement, so only the first match matters.</p>
+      </details>
+
+      <details>
+        <summary>What does the prices figure measure?</summary>
+        <p>Without money, every pair of goods needs its own exchange rate, such as eggs per sack of grain or eggs per pair of shoes. With 20 goods there are 190 such pairs. When one good serves as a common measure, each good needs only one price stated in that measure, which is 19 prices. This role is called the <strong>unit of account</strong>, and it is one of the three classic functions of money, alongside the <strong>medium of exchange</strong> and the <strong>store of value</strong>.</p>
+      </details>
+
+      <details>
+        <summary>Did barter economies actually exist?</summary>
+        <p>Anthropologists have found little evidence of whole societies organized around face-to-face barter. Many communities relied instead on credit, gift obligations, and shared records of who owed what to whom. The simulation should therefore be read as a thought experiment that isolates one problem money solves. It is not a historical account of how money began, and the origin of money remains a subject of genuine scholarly debate.</p>
+      </details>
+    </section>
+
+    <!-- STEP 4. Evaluate -->
+    <section class="step">
+      <h2><span class="n">4</span>Judge what makes good money</h2>
+      <p>If money solves the problem you just measured, then whatever serves as money must perform well at several tasks at once. Economists commonly describe six properties. Select a candidate, score it from 1 (poor) to 5 (excellent) on each property, and save your scores. Save at least two candidates to compare them on the chart.</p>
+
+      <div class="controls">
+        <div>
+          <label for="candidate">Candidate form of money</label>
+          <select id="candidate">
+            <option>Cattle</option>
+            <option>Cowrie shells</option>
+            <option>Gold coins</option>
+            <option>Paper banknotes</option>
+            <option>Bank deposits</option>
+            <option>Bitcoin</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="controls" id="propertySliders"></div>
+
+      <button class="btn" id="saveScores">Save scores for this candidate</button>
+      <button class="btn secondary" id="clearScores">Clear all scores</button>
+
+      <div id="radar" class="chart"></div>
+      <table class="score-table" id="scoreTable"></table>
+
+      <div class="callout">
+        <strong>Question to carry forward.</strong> Which property did your highest-scoring candidate owe its lead to, and which property did your lowest-scoring candidate lack? Consider whether any single candidate scored well on every property, and what that suggests about why societies have changed their money over time. Module 2 examines one of these properties, the ability to hold value over time, in quantitative detail.
+      </div>
+    </section>
+
+    <!-- STEP 5. Inspect -->
+    <section class="step">
+      <h2><span class="n">5</span>Inspect the code</h2>
+      <p>Nothing on this page is hidden. The Python below is the exact code that produced your simulation results, running in your browser through Pyodide.</p>
+      <details>
+        <summary>Show the Python model</summary>
+        <pre id="codeView" style="margin-top:12px;overflow-x:auto;font-size:13px;line-height:1.5;"></pre>
+      </details>
+    </section>
+
+    <p style="text-align:right;"><a class="btn" href="purchasing-power.html" style="text-decoration:none;display:inline-block;">Next module, Purchasing power over time</a></p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">erg is an educational project. Nothing on this site constitutes financial advice.</div>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// The Python model. Kept as a plain string so learners can read it in Step 5.
+// Inputs arrive as globals G (kinds of goods) and M (meetings).
+// ---------------------------------------------------------------------------
+const PY_MODEL = `import numpy as np
+
+def simulate(G, M):
+    rng = np.random.default_rng()
+
+    # Each trader makes one good and wants a different good.
+    makes_a = rng.integers(0, G, M)
+    wants_a = (makes_a + rng.integers(1, G, M)) % G
+    makes_b = rng.integers(0, G, M)
+    wants_b = (makes_b + rng.integers(1, G, M)) % G
+
+    # Barter needs a double coincidence of wants.
+    barter = (wants_a == makes_b) & (wants_b == makes_a)
+    # Money needs only a single coincidence.
+    money = (wants_a == makes_b)
+
+    # Exact probabilities for every village size from 2 to 100 goods.
+    g = np.arange(2, 101)
+    exact_barter = 1 / (g * (g - 1))
+    exact_money = 1 / g
+
+    return {
+        "barter_per_1000": float(1000 * barter.mean()),
+        "money_per_1000": float(1000 * money.mean()),
+        "exact_barter_per_1000": float(1000 / (G * (G - 1))),
+        "barter_prices": int(G * (G - 1) // 2),
+        "money_prices": int(G - 1),
+        "g": g.tolist(),
+        "exact_barter": exact_barter.tolist(),
+        "exact_money": exact_money.tolist(),
+    }
+
+result = simulate(G, M)
+result`;
+
+const PROPERTIES = [
+  ["Durability", "Survives handling and storage without decaying"],
+  ["Portability", "Easy to carry and transfer, even in large amounts"],
+  ["Divisibility", "Splits into small units without losing value"],
+  ["Uniformity", "Each unit is interchangeable with every other unit"],
+  ["Limited supply", "Cannot be produced cheaply or without limit"],
+  ["Acceptability", "Widely accepted by others in exchange"],
+];
+
+const $ = (id) => document.getElementById(id);
+let pyodide = null;
+let lockedPrediction = null;
+const saved = {};   // candidate name -> array of six scores, held in memory only
+
+const fmt = (x, d) => x.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// Slider labels
+function syncLabels() {
+  $("goodsOut").textContent = $("goods").value;
+  $("meetingsOut").textContent = Number($("meetings").value).toLocaleString("en-US");
+}
+["goods", "meetings"].forEach((id) => $(id).addEventListener("input", syncLabels));
+syncLabels();
+$("codeView").textContent = PY_MODEL;
+
+// Step 1
+$("lockPrediction").addEventListener("click", () => {
+  const v = parseFloat($("prediction").value);
+  if (isNaN(v) || v < 0 || v > 1000) {
+    $("predictionStatus").textContent = "Enter a number from 0 to 1,000 before locking in.";
+    $("predictionStatus").className = "status error";
+    return;
+  }
+  lockedPrediction = v;
+  $("prediction").disabled = true;
+  $("lockPrediction").disabled = true;
+  $("predictionStatus").textContent = "Prediction recorded as " + fmt(v, 0) + " trades per 1,000 meetings.";
+  $("predictionStatus").className = "status ready";
+});
+
+// Step 2
+async function startEngine() {
+  try {
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full/" });
+    await pyodide.loadPackage("numpy");
+    $("engineStatus").textContent = "Python engine ready.";
+    $("engineStatus").className = "status ready";
+    $("runBtn").disabled = false;
+  } catch (err) {
+    $("engineStatus").textContent = "The Python engine could not load. Check the internet connection and reload the page.";
+    $("engineStatus").className = "status error";
+    console.error(err);
+  }
+}
+
+function runModel() {
+  const G = Number($("goods").value);
+  const M = Number($("meetings").value);
+  pyodide.globals.set("G", G);
+  pyodide.globals.set("M", M);
+  const proxy = pyodide.runPython(PY_MODEL);
+  const r = proxy.toJs({ dict_converter: Object.fromEntries });
+  proxy.destroy();
+
+  $("statBarter").textContent = fmt(r.barter_per_1000, 1);
+  $("statMoney").textContent = fmt(r.money_per_1000, 1);
+  $("statRatio").textContent = r.barter_per_1000 > 0 ? fmt(r.money_per_1000 / r.barter_per_1000, 1) + "×" : "No barter trades";
+  $("statPrices").textContent = r.barter_prices.toLocaleString("en-US") + " vs " + r.money_prices;
+
+  drawChart(r, G);
+  reconcile(r, G);
+}
+
+function drawChart(r, G) {
+  const toPer1000 = (arr) => arr.map((p) => p * 1000);
+  const traces = [
+    { x: r.g, y: toPer1000(r.exact_money), name: "Money (exact)", mode: "lines",
+      line: { color: "#e0a526", width: 3 }, hovertemplate: "%{x} goods<br>%{y:.2f} per 1,000<extra></extra>" },
+    { x: r.g, y: toPer1000(r.exact_barter), name: "Barter (exact)", mode: "lines",
+      line: { color: "#4b2f82", width: 3 }, hovertemplate: "%{x} goods<br>%{y:.3f} per 1,000<extra></extra>" },
+    { x: [G, G], y: [r.money_per_1000, Math.max(r.barter_per_1000, 0.001)], name: "Your simulation",
+      mode: "markers", marker: { color: "#1f1830", size: 11, symbol: "diamond" },
+      hovertemplate: "%{x} goods<br>%{y:.2f} per 1,000<extra></extra>" },
+  ];
+  const layout = {
+    margin: { l: 70, r: 20, t: 20, b: 50 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "#f8f5fd",
+    font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+    xaxis: { title: "Kinds of goods in the village", gridcolor: "#e6def5" },
+    yaxis: { title: "Successful trades per 1,000 meetings", type: "log", gridcolor: "#e6def5" },
+    legend: { orientation: "h", y: -0.22 },
+  };
+  Plotly.react("chart", traces, layout, { responsive: true, displayModeBar: false });
+}
+
+// Step 3
+function reconcile(r, G) {
+  if (lockedPrediction === null) {
+    $("reconcileText").textContent = "Lock in a prediction in Step 1 to compare it with the model.";
+    return;
+  }
+  if (G !== 20) {
+    $("reconcileText").textContent = "Your prediction referred to a village with 20 kinds of goods. Return the slider to 20 and run the simulation again to compare.";
+    return;
+  }
+  const exact = r.exact_barter_per_1000;
+  const ratio = lockedPrediction / exact;
+  let judgment;
+  if (ratio > 1.5) judgment = "about " + fmt(ratio, 0) + " times higher than";
+  else if (ratio < 0.67) judgment = "lower than";
+  else judgment = "close to";
+  $("reconcileText").textContent =
+    "You predicted " + fmt(lockedPrediction, 0) + " trades per 1,000 meetings. Your simulation produced " +
+    fmt(r.barter_per_1000, 1) + ", and the exact expected value is " + fmt(exact, 2) +
+    ". Your estimate was " + judgment + " the model. Consider which requirement of barter your reasoning accounted for, and which one it may have left out.";
+}
+
+// Step 4. Property scoring
+function buildSliders() {
+  $("propertySliders").innerHTML = PROPERTIES.map(([name, desc], k) => `
+    <div>
+      <label for="prop${k}">${name} <output id="prop${k}Out">3</output></label>
+      <input type="range" id="prop${k}" min="1" max="5" step="1" value="3">
+      <div class="status" style="margin-top:4px;">${desc}</div>
+    </div>`).join("");
+  PROPERTIES.forEach((_, k) => {
+    $("prop" + k).addEventListener("input", () => { $("prop" + k + "Out").textContent = $("prop" + k).value; });
+  });
+}
+
+function loadCandidate() {
+  const scores = saved[$("candidate").value];
+  PROPERTIES.forEach((_, k) => {
+    const v = scores ? scores[k] : 3;
+    $("prop" + k).value = v;
+    $("prop" + k + "Out").textContent = v;
+  });
+}
+
+const RADAR_COLORS = ["#4b2f82", "#e0a526", "#2f7a4d", "#a3312a", "#1a6f8a", "#8a5a2b"];
+
+function drawRadar() {
+  const names = Object.keys(saved);
+  const labels = PROPERTIES.map((p) => p[0]);
+  const traces = names.map((n, idx) => ({
+    type: "scatterpolar",
+    r: [...saved[n], saved[n][0]],
+    theta: [...labels, labels[0]],
+    name: n,
+    fill: "toself",
+    opacity: 0.55,
+    line: { color: RADAR_COLORS[idx % RADAR_COLORS.length], width: 2 },
+  }));
+  const layout = {
+    margin: { l: 60, r: 60, t: 30, b: 30 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    font: { family: "DM Sans, sans-serif", color: "#1f1830" },
+    polar: { bgcolor: "#f8f5fd", radialaxis: { range: [0, 5], dtick: 1, gridcolor: "#e6def5" }, angularaxis: { gridcolor: "#e6def5" } },
+    legend: { orientation: "h", y: -0.12 },
+    showlegend: true,
+  };
+  if (names.length === 0) {
+    $("radar").innerHTML = "";
+    $("scoreTable").innerHTML = "";
+    return;
+  }
+  Plotly.react("radar", traces, layout, { responsive: true, displayModeBar: false });
+
+  const rows = names
+    .map((n) => [n, saved[n].reduce((a, b) => a + b, 0)])
+    .sort((a, b) => b[1] - a[1])
+    .map(([n, total]) => `<tr><td>${n}</td><td>${total} of 30</td></tr>`)
+    .join("");
+  $("scoreTable").innerHTML = `<thead><tr><th>Candidate</th><th>Total score</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+$("candidate").addEventListener("change", loadCandidate);
+$("saveScores").addEventListener("click", () => {
+  saved[$("candidate").value] = PROPERTIES.map((_, k) => Number($("prop" + k).value));
+  drawRadar();
+});
+$("clearScores").addEventListener("click", () => {
+  Object.keys(saved).forEach((k) => delete saved[k]);
+  loadCandidate();
+  drawRadar();
+});
+
+buildSliders();
+$("runBtn").addEventListener("click", runModel);
+startEngine();
+</script>
+</body>
+</html>
