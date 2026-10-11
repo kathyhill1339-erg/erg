@@ -25,6 +25,7 @@ lessons/purchasing-power.html  Module 2, inflation model and the simplest templa
 lessons/central-banks.html     Module 3, entry channels for new money and a Cantillon effect model
 lessons/reserve-currencies.html  Module 4, network-effect model of currency dominance with IMF and BIS data
 lessons/energy-and-value.html  Module 5, supply growth and stock-to-flow projections and a mining energy model
+lessons/debasement-history.html  Reading, a short history of currency debasement
 .nojekyll                      Tells GitHub Pages to serve files as they are
 ```
 
